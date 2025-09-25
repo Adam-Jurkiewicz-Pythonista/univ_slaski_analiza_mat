@@ -5,6 +5,12 @@ import numpy as np
 from sklearn.cluster import KMeans
 from datetime import datetime
 
+IMAGES_DIRECTORY = "/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/images_in/"
+
+# Dla Windows
+# IMAGES_DIRECTORY = "C:/Users/M/PycharmProjects/univ_slaski_analiza_mat/images_in/"
+
+
 
 log_dir = '/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/logs/'
 if not os.path.exists(log_dir):
@@ -17,7 +23,7 @@ logging.basicConfig(
 
 class Obraz:
     def __init__(self, file_name):
-        self.images_directory = "/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/images_in/"
+        self.images_directory = IMAGES_DIRECTORY
         self.file_name = file_name
         self.file_name_only = os.path.splitext(os.path.basename(self.file_name))[0]
         self.file_extension = os.path.splitext(os.path.basename(self.file_name))[1]
