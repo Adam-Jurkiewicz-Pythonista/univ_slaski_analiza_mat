@@ -1,0 +1,7 @@
+INFO Edge detection for file file_name='test_edge.jpg'
+INFO Reading test_edge.jpg
+INFO Read complete test_edge.jpg - (2160, 2880) / uint8
+INFO File -- INIT Complete self.file_name='test_edge.jpg' in /home/adasiek/PycharmProjects/univ_slaski_analiza_mat/edges
+INFO Canny Edge detection for file self.file_name='test_edge.jpg' / self.image_raw.shape=(2160, 2880)
+INFO File already exists -- new_file_name='/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/edges/test_edge_edges_found.jpg'
+INFO File overwritten -- new_file_name='/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/edges/test_edge_edges_found.jpg'

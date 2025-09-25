@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 from datetime import datetime
 from pathlib import Path
 
+
 # ważne! tego nie dotykaj!
 base_dir = Path(__file__).parent.parent
 RUN_DATE = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -51,8 +52,14 @@ def wczytaj_pliki_z_katalogu(typy_plikow=("jpg","bmp","jpeg"), min_wielkosc=1000
     return zwracane_pliki
 
 class Obraz:
-    def __init__(self, file_name):
-        self.images_directory = IMAGES_DIRECTORY
+    def __init__(self, file_name, edge_detector_dir=None):
+        """
+
+        :param file_name:
+        :param edge_detector_dir: dodatkowy, jeśli istnieje, to nadpisuje IMAGES_DIRECTORY
+        """
+
+        self.images_directory = edge_detector_dir if edge_detector_dir is not None else IMAGES_DIRECTORY
         self.file_name = file_name
         self.file_name_only = os.path.splitext(os.path.basename(self.file_name))[0]
         self.file_extension = os.path.splitext(os.path.basename(self.file_name))[1]
@@ -62,22 +69,28 @@ class Obraz:
 
         if not os.path.exists(self.images_directory+"/"+file_name):
             logging.error(f'File {file_name} not found in {self.images_directory}')
-            self.file_name = None
+            raise Exception(f'__Class__ Obrazy: File {file_name} not found in {self.images_directory}')
         if not self.read_file():
             self.change_file_color2bw()
 
-        logging.info(f'File -- INIT Complete {self.file_name=} in {IMAGES_DIRECTORY}')
+        logging.info(f'File -- INIT Complete {self.file_name=} in {self.images_directory}')
 
     def __str__(self):
         return f'{self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}'
 
     @staticmethod
-    def image_save2file(image_raw, new_file_name):
+    def image_save2file(image_raw, new_file_name, overwrite=False):
         try:
             if not os.path.isfile(new_file_name):
                 cv2.imwrite(new_file_name, image_raw)
                 logging.info(f'File saved -- {new_file_name=}')
                 return True
+            else:
+                logging.info(f'File already exists -- {new_file_name=}')
+                if overwrite:
+                    os.remove(new_file_name)
+                    cv2.imwrite(new_file_name, image_raw)
+                    logging.info(f'File overwritten -- {new_file_name=}')
         except Exception as e:
             logging.error(f'image_save2file {image_raw} - {e=}')
             return False
@@ -199,3 +212,43 @@ class KMeansObraz(Obraz):
             return False
         # return self.proc_clusters
         print(self.file_name, json.dumps(self.proc_clusters))
+
+class CannyEdge(Obraz):
+    def __init__(self, file_name, edge_directory_last = "edges"):
+        """
+
+        :param file_name:
+        :param edge_directory_last: domyślnie 'edges'
+        """
+        edge_directory = str(base_dir / edge_directory_last)
+        # + "-" + RUN_DATE
+        # najpierw spradzamy
+        if not os.path.exists(edge_directory):
+            raise Exception(f"Directory {edge_directory=} does not exist!!!")
+
+        self.edge_directory = edge_directory
+        self.edges_found = None
+        logging.info(f"Edge detection for file {file_name=}")
+        super().__init__(file_name, edge_detector_dir=self.edge_directory)
+
+    def canny_detect(self, search_type='auto', treshold = (127,127), file_overwrite=False):
+        """
+        Generuje plik z dodatkiem w nazwie '_edges_found' i zapisuje w katalogu edges
+        :param search_type: 'auto' - treshold 127, 'median' - oblicza medianę
+        :param treshold: tuple (int 0 ... 255, int 0 ... 255)
+        :param file_overwrite: bool - domyślnie False | True
+        :return:
+        """
+        logging.info(f"Canny Edge detection for file {self.file_name=} / {self.image_raw.shape=}")
+        threshold1, threshold2 = treshold
+        if search_type == 'median':
+            med_val = np.median(self.image_raw)
+            threshold1 = int(max(0, 0.7*med_val))
+            threshold2 = int(min(255, 1.3*med_val))
+        elif search_type == 'custom':
+            pass
+
+        self.edges_found = cv2.Canny(image=self.image_raw,
+                                     threshold1=threshold1, threshold2=threshold2)
+        edges_file_name = self.edge_directory + "/" + self.file_name_only+"_edges_found"+self.file_extension
+        self.image_save2file(self.edges_found, edges_file_name, overwrite = file_overwrite )

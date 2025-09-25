@@ -8,7 +8,7 @@ print(pliki)
 
 # tworzę listę obiektóœ dla każdego pliku
 lista_obrazow = [ KMeansObraz(plik,n_clusters=3) for plik in pliki ]
-print(lista_obrazow)
+# print(lista_obrazow)
 
 # dla każdego elementu listy o nazwie obrazek obliczam klastry
 # ale nie zapisuję wynikowych plików graficznych
