@@ -10,7 +10,10 @@ print(obrazek2)
 
 # wykonanie analizy
 obrazek1.run_kmeans()
+obrazek2.run_kmeans()
 # zapis wyników analizy do plików graficznych
 obrazek1.save_clusters()
+obrazek2.save_clusters()
 # pokaż wyniki
 obrazek1.show_clusters()
+obrazek2.show_clusters()
