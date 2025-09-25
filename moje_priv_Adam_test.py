@@ -12,4 +12,5 @@ print(obrazek2)
 obrazek1.run_kmeans()
 # zapis wyników analizy do plików graficznych
 obrazek1.save_clusters()
-print(obrazek1.show_clusters())
+# pokaż wyniki
+obrazek1.show_clusters()

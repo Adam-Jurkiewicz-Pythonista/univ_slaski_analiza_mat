@@ -176,4 +176,4 @@ class KMeansObraz(Obraz):
             logging.info(f'Run first run_kmeans on {self.file_name} ')
             return False
         # return self.proc_clusters
-        return (self.file_name, json.dumps(self.proc_clusters))
+        print(self.file_name, json.dumps(self.proc_clusters))
