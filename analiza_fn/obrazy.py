@@ -4,10 +4,11 @@ import logging
 import numpy as np
 from sklearn.cluster import KMeans
 from datetime import datetime
-from .pliki import *
+
 
 log_dir = '/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/logs/'
-create_dir(log_dir)
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 logging.basicConfig(
     filename=f'{log_dir}Obrazy-{datetime.now().strftime('%Y%m%d-%H%M%S')}.log',
     level=logging.DEBUG,
@@ -24,7 +25,7 @@ class Obraz:
         self.image_raw = None
         self.file_read_ok = None
 
-        if not check_file(self.images_directory+file_name):
+        if not os.path.exists(self.images_directory+file_name):
             logging.error(f'File {file_name} not found in {self.images_directory}')
             self.file_name = None
             return None
