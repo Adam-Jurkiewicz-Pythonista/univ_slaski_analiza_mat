@@ -9,20 +9,24 @@ from pathlib import Path
 
 # ważne! tego nie dotykaj!
 base_dir = Path(__file__).parent.parent
+RUN_DATE = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 # przykład: ścieżka do podfolderu ze zdjęciami - tu zmieniamy ewentualnie!
 IMAGES_DIRECTORY = str(base_dir / "images_in")
+IMAGES_CLUSTER_DIRECTORY = str(base_dir / "images_in/clusters-")+ RUN_DATE
 LOGS_DIRECTORY = str(base_dir / "logs")
 #########
 
 if not os.path.exists(IMAGES_DIRECTORY):
     raise Exception(f"Directory {IMAGES_DIRECTORY} does not exist!!!")
 
+if not os.path.exists(IMAGES_CLUSTER_DIRECTORY):
+    os.makedirs(IMAGES_CLUSTER_DIRECTORY)
 
 if not os.path.exists(LOGS_DIRECTORY):
     os.makedirs(LOGS_DIRECTORY)
 logging.basicConfig(
-    filename=f'{LOGS_DIRECTORY}/Obrazy-{datetime.now().strftime('%Y%m%d-%H%M%S')}.log',
+    filename=f'{LOGS_DIRECTORY}/Obrazy-{RUN_DATE}.log',
     level=logging.DEBUG,
     format='%(levelname)s %(message)s'
 )
@@ -33,15 +37,16 @@ def wczytaj_pliki_z_katalogu(typy_plikow=("jpg","bmp","jpeg"), min_wielkosc=1000
     zwracane_pliki = []
     # rekurencyjnie sprawdza podkatalogi
     # https://github.com/abixadamj/helion-python/blob/main/Rozdzial_7/r7_00_walk.py
-    for dirpath, dirname, files in os.walk(IMAGES_DIRECTORY):
+    # patrzymy na pliki tylko w 1 katalogu BEZ podkatalogów
+    files = [f for f in os.listdir(IMAGES_DIRECTORY) if os.path.isfile(os.path.join(IMAGES_DIRECTORY, f))]
 
-        for each_file in files:
-            ext = os.path.splitext(each_file)[1].lower()
-            for maska in typy_plikow:
-                if maska in ext:
-                    plik_z_danymi = dirpath + "/" + each_file
-                    if os.path.getsize(plik_z_danymi)>min_wielkosc:
-                        zwracane_pliki.append(each_file)
+    for each_file in files:
+        ext = os.path.splitext(each_file)[1].lower()
+        for maska in typy_plikow:
+            if maska in ext:
+                plik_z_danymi = IMAGES_DIRECTORY + "/" + each_file
+                if os.path.getsize(plik_z_danymi)>min_wielkosc:
+                    zwracane_pliki.append(each_file)
 
     return zwracane_pliki
 
@@ -138,7 +143,7 @@ class KMeansObraz(Obraz):
 
     def run_kmeans(self):
         if self.kmeans is True:
-            logging.info(f'Already ran KMeans on {self.n_clusters} clusters')
+            logging.info(f'Already ran KMeans on {self.n_clusters} old_cls')
             return False
 
         img = self.image_raw
@@ -185,7 +190,7 @@ class KMeansObraz(Obraz):
         if self.kmeans is None:
             logging.info(f'Run first run_kmeans on {self.file_name} ')
         for idx, image in enumerate(self.img_clusters):
-            new_file_name = f'{self.images_directory}/{self.file_name_only}_{self.centers_names[idx]}_{self.file_extension}'
+            new_file_name = f'{IMAGES_CLUSTER_DIRECTORY}/{self.file_name_only}_{self.centers_names[idx]}_{self.file_extension}'
             self.image_save2file(image, new_file_name)
 
     def show_clusters(self):
