@@ -58,7 +58,6 @@ class Obraz:
         if not os.path.exists(self.images_directory+"/"+file_name):
             logging.error(f'File {file_name} not found in {self.images_directory}')
             self.file_name = None
-            return None
         if not self.read_file():
             self.change_file_color2bw()
 
