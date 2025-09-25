@@ -1,9 +1,9 @@
 # to będzie przyklad dla Was
-from analiza_fn.obrazy import KMeansObraz
-from analiza_fn.pliki import wczytaj_pliki_z_katalogu
+from analiza_fn.obrazy import KMeansObraz, wczytaj_pliki_z_katalogu
 
-# sprawdzam pliki wejściowe - muszę podać nazwę katalogu
-pliki = wczytaj_pliki_z_katalogu("images_in/")
+
+# sprawdzam pliki wejściowe - katalog ze zdjęciami IMAGES_DIRECTORY
+pliki = wczytaj_pliki_z_katalogu()
 print(pliki)
 
 # tworzę listę obiektóœ dla każdego pliku

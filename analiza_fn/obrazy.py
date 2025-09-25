@@ -27,6 +27,24 @@ logging.basicConfig(
     format='%(levelname)s %(message)s'
 )
 
+
+# funkcje ogólnego przeznaczenia
+def wczytaj_pliki_z_katalogu(typy_plikow=("jpg","bmp","jpeg"), min_wielkosc=1000):
+    zwracane_pliki = []
+    # rekurencyjnie sprawdza podkatalogi
+    # https://github.com/abixadamj/helion-python/blob/main/Rozdzial_7/r7_00_walk.py
+    for dirpath, dirname, files in os.walk(IMAGES_DIRECTORY):
+
+        for each_file in files:
+            ext = os.path.splitext(each_file)[1].lower()
+            for maska in typy_plikow:
+                if maska in ext:
+                    plik_z_danymi = dirpath + "/" + each_file
+                    if os.path.getsize(plik_z_danymi)>min_wielkosc:
+                        zwracane_pliki.append(each_file)
+
+    return zwracane_pliki
+
 class Obraz:
     def __init__(self, file_name):
         self.images_directory = IMAGES_DIRECTORY
