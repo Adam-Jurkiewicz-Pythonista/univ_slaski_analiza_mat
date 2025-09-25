@@ -1,6 +1,7 @@
 import os
 import cv2
 import logging
+import json
 import numpy as np
 from sklearn.cluster import KMeans
 from datetime import datetime
@@ -158,7 +159,7 @@ class KMeansObraz(Obraz):
             logging.info(f"Liczba pixeli dla {wycinek=} {count=} {procent=}")
             # teraz zapis takiego obrazka do self.klastry
             self.img_clusters.append(segmented_img_wycinek)
-            self.proc_clusters[wycinek] = [count, round(procent,2)]
+            self.proc_clusters[int(wycinek)] = [count, round(procent,2)]
         else:
             self.kmeans = True
 
@@ -169,3 +170,10 @@ class KMeansObraz(Obraz):
         for idx, image in enumerate(self.img_clusters):
             new_file_name = f'{self.images_directory}/{self.file_name_only}_{self.centers_names[idx]}_{self.file_extension}'
             self.image_save2file(image, new_file_name)
+
+    def show_clusters(self):
+        if self.kmeans is None:
+            logging.info(f'Run first run_kmeans on {self.file_name} ')
+            return False
+        # return self.proc_clusters
+        return (json.dumps(self.proc_clusters))
