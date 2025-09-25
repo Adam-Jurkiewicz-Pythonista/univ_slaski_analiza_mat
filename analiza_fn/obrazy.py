@@ -24,9 +24,10 @@ class Obraz:
         self.image_raw = None
         self.file_read_ok = None
 
-        if not check_file(file_name):
-            logging.error(f'File {file_name} not found')
+        if not check_file(self.images_directory+file_name):
+            logging.error(f'File {file_name} not found in {self.images_directory}')
             self.file_name = None
+            return None
         if not self.read_file():
             self.change_file_color2bw()
 
@@ -54,7 +55,7 @@ class Obraz:
         logging.info(f'Reading {self.file_name}')
         try:
             if self.file_read_ok is None:
-                self.image_raw = cv2.imread(self.file_name, cv2.IMREAD_GRAYSCALE)
+                self.image_raw = cv2.imread(self.images_directory+self.file_name, cv2.IMREAD_GRAYSCALE)
                 self.file_read_ok = True
                 logging.info(f'Read complete {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}')
                 return True
@@ -65,7 +66,7 @@ class Obraz:
 
     def change_file_color2bw(self):
         if self.file_read_ok is None:
-            img_tmp = cv2.imread(self.file_name)
+            img_tmp = cv2.imread(self.images_directory+self.file_name)
             self.file_name_bw = self.file_name_only+"_bw" + self.file_extension
             logging.info(f'Change {self.file_name} from {img_tmp.shape} / {self.image_raw.dtype} => cv2.IMREAD_GRAYSCALE {self.file_name_bw}')
             try:
