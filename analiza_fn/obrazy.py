@@ -4,19 +4,24 @@ import logging
 import numpy as np
 from sklearn.cluster import KMeans
 from datetime import datetime
+from pathlib import Path
 
-IMAGES_DIRECTORY = "/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/images_in/"
+# ważne! tego nie dotykaj!
+base_dir = Path(__file__).parent.parent
 
-# Dla Windows
-# IMAGES_DIRECTORY = "C:/Users/M/PycharmProjects/univ_slaski_analiza_mat/images_in/"
+# przykład: ścieżka do podfolderu ze zdjęciami - tu zmieniamy ewentualnie!
+IMAGES_DIRECTORY = str(base_dir / "images_in")
+LOGS_DIRECTORY = str(base_dir / "logs")
+#########
+
+if not os.path.exists(IMAGES_DIRECTORY):
+    raise Exception(f"Directory {IMAGES_DIRECTORY} does not exist!!!")
 
 
-
-log_dir = '/home/adasiek/PycharmProjects/univ_slaski_analiza_mat/logs/'
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+if not os.path.exists(LOGS_DIRECTORY):
+    os.makedirs(LOGS_DIRECTORY)
 logging.basicConfig(
-    filename=f'{log_dir}Obrazy-{datetime.now().strftime('%Y%m%d-%H%M%S')}.log',
+    filename=f'{LOGS_DIRECTORY}/Obrazy-{datetime.now().strftime('%Y%m%d-%H%M%S')}.log',
     level=logging.DEBUG,
     format='%(levelname)s %(message)s'
 )
@@ -31,14 +36,14 @@ class Obraz:
         self.image_raw = None
         self.file_read_ok = None
 
-        if not os.path.exists(self.images_directory+file_name):
+        if not os.path.exists(self.images_directory+"/"+file_name):
             logging.error(f'File {file_name} not found in {self.images_directory}')
             self.file_name = None
             return None
         if not self.read_file():
             self.change_file_color2bw()
 
-        logging.info(f'File -- INIT Complete {self.file_name=}')
+        logging.info(f'File -- INIT Complete {self.file_name=} in {IMAGES_DIRECTORY}')
 
     def __str__(self):
         return f'{self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}'
@@ -62,7 +67,7 @@ class Obraz:
         logging.info(f'Reading {self.file_name}')
         try:
             if self.file_read_ok is None:
-                self.image_raw = cv2.imread(self.images_directory+self.file_name, cv2.IMREAD_GRAYSCALE)
+                self.image_raw = cv2.imread(self.images_directory+"/"+self.file_name, cv2.IMREAD_GRAYSCALE)
                 self.file_read_ok = True
                 logging.info(f'Read complete {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}')
                 return True
@@ -73,15 +78,15 @@ class Obraz:
 
     def change_file_color2bw(self):
         if self.file_read_ok is None:
-            img_tmp = cv2.imread(self.images_directory+self.file_name)
+            img_tmp = cv2.imread(self.images_directory+"/"+self.file_name)
             self.file_name_bw = self.file_name_only+"_bw" + self.file_extension
             logging.info(f'Change {self.file_name} from {img_tmp.shape} / {self.image_raw.dtype} => cv2.IMREAD_GRAYSCALE {self.file_name_bw}')
             try:
                 self.image_raw = cv2.cvtColor(img_tmp, cv2.COLOR_BGR2GRAY)
-                self.image_save2file(self.image_raw, self.images_directory+self.file_name_bw)
+                self.image_save2file(self.image_raw, self.images_directory+"/"+self.file_name_bw)
                 # new reading
                 self.file_read_ok = None
-                self.file_name = self.images_directory+self.file_name_bw
+                self.file_name = self.images_directory+"/"+self.file_name_bw
                 if self.read_file():
                     return True
             except Exception as e:
@@ -154,5 +159,5 @@ class KMeansObraz(Obraz):
         if self.kmeans is None:
             logging.info(f'Run first run_kmeans on {self.file_name} ')
         for idx, image in enumerate(self.img_clusters):
-            new_file_name = f'{self.images_directory}{self.file_name_only}_{self.centers_names[idx]}_{self.file_extension}'
+            new_file_name = f'{self.images_directory}/{self.file_name_only}_{self.centers_names[idx]}_{self.file_extension}'
             self.image_save2file(image, new_file_name)
