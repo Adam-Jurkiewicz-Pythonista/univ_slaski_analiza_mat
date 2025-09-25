@@ -98,6 +98,14 @@ class KMeansObraz(Obraz):
     def __init__(self, file_name, n_clusters=5,
                  lista_klastrow_do_wydzielenia=None,
                  clasters_init='k-means++'):
+        """
+
+        To jest dokumentacja dla Was
+        :param file_name:
+        :param n_clusters:
+        :param lista_klastrow_do_wydzielenia:
+        :param clasters_init:
+        """
         super().__init__(file_name)
         self.n_clusters = n_clusters
         self.clusters_init = clasters_init
