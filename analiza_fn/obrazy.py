@@ -102,9 +102,9 @@ class KMeansObraz(Obraz):
 
         To jest dokumentacja dla Was
         :param file_name:
-        :param n_clusters:
-        :param lista_klastrow_do_wydzielenia:
-        :param clasters_init:
+        :param n_clusters: liczba klatrów, domyślnie 5
+        :param lista_klastrow_do_wydzielenia: np.: (1,3,4) - domyślnie wszystkie
+        :param clasters_init: domyślnie 'k-means++', lub 'random'
         """
         super().__init__(file_name)
         self.n_clusters = n_clusters

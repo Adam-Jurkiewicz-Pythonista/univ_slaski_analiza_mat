@@ -1,5 +1,7 @@
 # to będzie przyklad dla Was
 from analiza_fn.obrazy import KMeansObraz
 
-obrazek = KMeansObraz("Fe1i5Cr1i5_obszar2_x1000_x12_y5_R1_C7.jpg")
-print(obrazek)
+# przykład obliczania klastrów odcieni szarości
+obrazek1 = KMeansObraz("Fe1i5Cr1i5_obszar2_x1000_x12_y5_R1_C7.jpg") #
+obrazek2 = KMeansObraz("Fe1i5Cr1i5_obszar2_x1000_x12_y5_R1_C9.jpg",
+                       n_clusters=3) # 3 klastry
