@@ -18,8 +18,7 @@ IMAGES_CLUSTER_DIRECTORY = str(base_dir / "images_in/clusters-") + RUN_DATE
 LOGS_DIRECTORY = str(base_dir / "logs")
 #########
 
-if not os.path.exists(IMAGES_DIRECTORY):
-    raise Exception(f"Directory {IMAGES_DIRECTORY} does not exist!!!")
+
 
 if not os.path.exists(IMAGES_CLUSTER_DIRECTORY):
     os.makedirs(IMAGES_CLUSTER_DIRECTORY)
@@ -67,6 +66,10 @@ class Obraz:
         self.images_directory = (
             additional_images_dir if additional_images_dir is not None else IMAGES_DIRECTORY
         )
+
+        if not os.path.exists(self.images_directory):
+            raise Exception(f"Directory {self.images_directory} does not exist!!!")
+
         self.file_name = file_name
         self.file_name_only = os.path.splitext(os.path.basename(self.file_name))[0]
         self.file_extension = os.path.splitext(os.path.basename(self.file_name))[1]
@@ -289,3 +292,15 @@ class CannyEdge(Obraz):
         self.image_save2file(
             self.edges_found, edges_file_name, overwrite=file_overwrite
         )
+
+class X(Obraz):
+    def __init__(self, file_name):
+        # tu trzeba dać tylko 1 wiersz, by działało
+
+
+    def dowolna_metoda(self):
+        print(f"Jakas metoda: {self.file_name=}")
+
+
+pliczek = X("plik_graficzny.jpg") # musi być w xx_obrazy
+pliczek.dowolna_metoda()

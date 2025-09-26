@@ -1,8 +1,11 @@
 # to będzie przyklad dla Was
-from analiza_fn.obrazy import CannyEdge
+from analiza_fn.obrazy import CannyEdge,X
 
 plik = CannyEdge("test_edge.jpg")  # musi być w katalogu 'edges'
 inny_plik = CannyEdge("test_edge.jpg", edge_directory_last="katalog")
+
+
+pliczek = X("jakis.jpg") # musi być w xx_obrazy
 
 # Generuje plik z dodatkiem w nazwie '_edges_found' i zapisuje w katalogu edges
 # Params:
