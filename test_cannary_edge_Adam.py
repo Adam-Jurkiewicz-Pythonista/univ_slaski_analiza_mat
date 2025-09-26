@@ -1,9 +1,10 @@
 # to będzie przyklad dla Was
 from analiza_fn.obrazy import CannyEdge
 
-plik = CannyEdge("test_edge.jpg") # musi być w katalogu 'edges'
+plik = CannyEdge("test_edge.jpg")  # musi być w katalogu 'edges'
+inny_plik = CannyEdge("test_edge.jpg", edge_directory_last="katalog")
 
 # Generuje plik z dodatkiem w nazwie '_edges_found' i zapisuje w katalogu edges
 # Params:
 # treshold – int 0 ... 255
-plik.canny_detect(search_type='median', file_overwrite=True)
+plik.canny_detect(search_type="median", file_overwrite=True)

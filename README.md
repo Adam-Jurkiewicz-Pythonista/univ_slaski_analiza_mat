@@ -10,6 +10,10 @@ Analiza obrazów dla Uniwersytetu Śląskiego - Python OpenCV
 Wywołujemy z nazwą pliku, który musi znajdowa się w podkatalogu `edges` lub podajemy taki podkatalog jako parametr - patrz docstring.
 `plik = CannyEdge("test_edge.jpg")`
 
+W innym katalogu trzymamy fotkę: `inny_plik = CannyEdge("test_edge.jpg", edge_directory_last="katalog")
+`
+
+
 Potem wołamy metodę wyszukiwania brzegów, np:
 ```
 plik.canny_detect(search_type='median', file_overwrite=True)
