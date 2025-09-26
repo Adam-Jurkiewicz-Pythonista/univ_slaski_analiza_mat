@@ -172,8 +172,20 @@ class Obraz:
             cv2.destroyAllWindows()  # Closes all open OpenCV windows
 
     def blur_image(self):
+        """
+
+         Average blurring (normalized box filter)
+        blurred = cv2.blur(img, (5, 5))
+
+        # Gaussian blurring (bell-curve weighted)
+        gaussian_blur = cv2.GaussianBlur(img, (7, 7), 0)
+
+        # Median blurring (good for noise reduction)
+        median_blur = cv2.medianBlur(img, 5)
+        """
         if self.file_read_ok is not None:
-            blurred = cv2.blur(self.image_raw, (5, 5))
+            img = self.image_raw.copy()
+            blurred = cv2.blur(img, (5, 5))
             self.image_raw = blurred
             logging.info(f"Blurred {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}")
 
