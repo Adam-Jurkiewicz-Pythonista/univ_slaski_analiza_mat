@@ -150,6 +150,12 @@ class Obraz:
                 logging.error(f"Failed to change color {self.file_name_bw} => {e=}")
                 return False
 
+    def show_image(self):
+        if self.file_read_ok is not None:
+            cv2.imshow(self.file_name, self.image_raw)
+            cv2.waitKey(0)  # Waits indefinitely for a keypress
+            cv2.destroyAllWindows()  # Closes all open OpenCV windows
+
 
 class KMeansObraz(Obraz):
     def __init__(
