@@ -156,6 +156,10 @@ class Obraz:
             cv2.waitKey(0)  # Waits indefinitely for a keypress
             cv2.destroyAllWindows()  # Closes all open OpenCV windows
 
+    def blur_image(self):
+        if self.file_read_ok is not None:
+            blurred = cv2.blur(self.image_raw, (5, 5))
+            self.image_raw = blurred
 
 class KMeansObraz(Obraz):
     def __init__(
