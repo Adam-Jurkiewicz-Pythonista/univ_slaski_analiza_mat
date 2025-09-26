@@ -2,6 +2,7 @@ import os
 import cv2
 import logging
 import json
+import hashlib
 import numpy as np
 from sklearn.cluster import KMeans
 from datetime import datetime
@@ -77,6 +78,7 @@ class Obraz:
         self.image_raw = None
         self.image_original = None # tu oryginalny obraz do ewentualnych porównań
         self.file_read_ok = None
+        self.md5sum = None
 
         if not os.path.exists(self.images_directory + "/" + file_name):
             logging.error(f"File {file_name} not found in {self.images_directory}")
@@ -91,7 +93,7 @@ class Obraz:
         )
 
     def __str__(self):
-        return f"{self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}"
+        return f"{self.file_name} - {self.image_raw.shape} {self.image_raw.dtype} / md5: {self.md5sum}"
 
     @staticmethod
     def image_save2file(image_raw, new_file_name, overwrite=False):
@@ -126,6 +128,7 @@ class Obraz:
                 self.file_read_ok = True
                 # kopia oryginalnego obrazu do porównań
                 self.image_original = self.image_raw.copy()
+                self.md5sum = hashlib.md5(self.image_raw).hexdigest()
                 logging.info(
                     f"Read complete {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}"
                 )
