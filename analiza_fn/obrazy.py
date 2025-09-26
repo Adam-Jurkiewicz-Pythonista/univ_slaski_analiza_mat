@@ -75,6 +75,7 @@ class Obraz:
         self.file_extension = os.path.splitext(os.path.basename(self.file_name))[1]
         self.file_name_bw = None
         self.image_raw = None
+        self.image_original = None # tu oryginalny obraz do ewentualnych porównań
         self.file_read_ok = None
 
         if not os.path.exists(self.images_directory + "/" + file_name):
@@ -123,6 +124,8 @@ class Obraz:
                     raise Exception(f"File {self.file_name} prawdopodobnie nie jest graficzny")
 
                 self.file_read_ok = True
+                # kopia oryginalnego obrazu do porównań
+                self.image_original = self.image_raw.copy()
                 logging.info(
                     f"Read complete {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}"
                 )
@@ -155,7 +158,13 @@ class Obraz:
 
     def show_image(self):
         if self.file_read_ok is not None:
-            cv2.imshow(self.file_name, self.image_raw)
+            cv2.imshow(f"Aktualny obraz: {self.file_name}", self.image_raw)
+            cv2.waitKey(0)  # Waits indefinitely for a keypress
+            cv2.destroyAllWindows()  # Closes all open OpenCV windows
+
+    def show_original_image(self):
+        if self.file_read_ok is not None:
+            cv2.imshow(f"Oryginalny obraz: {self.file_name}", self.image_original)
             cv2.waitKey(0)  # Waits indefinitely for a keypress
             cv2.destroyAllWindows()  # Closes all open OpenCV windows
 
@@ -163,6 +172,7 @@ class Obraz:
         if self.file_read_ok is not None:
             blurred = cv2.blur(self.image_raw, (5, 5))
             self.image_raw = blurred
+            logging.info(f"Blurred {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}")
 
 class KMeansObraz(Obraz):
     def __init__(
