@@ -285,13 +285,9 @@ class CannyEdge(Obraz):
         :param file_name:
         :param edge_directory_last: domyślnie 'edges'
         """
-        edge_directory = str(base_dir / edge_directory_last)
-        # + "-" + RUN_DATE
-        # najpierw spradzamy
-        if not os.path.exists(edge_directory):
-            raise Exception(f"Directory {edge_directory=} does not exist!!!")
 
-        self.edge_directory = edge_directory
+
+        self.edge_directory = edge_directory_last
         self.edges_found = None
         logging.info(f"Edge detection for file {file_name=}")
         super().__init__(file_name, additional_images_dir=self.edge_directory)
@@ -327,6 +323,8 @@ class CannyEdge(Obraz):
             + "_edges_found"
             + self.file_extension
         )
+        self.image_raw = self.edges_found.copy()
+        self.show_image()
         self.image_save2file(
             self.edges_found, edges_file_name, overwrite=file_overwrite
         )
