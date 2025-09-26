@@ -302,5 +302,3 @@ class X(Obraz):
         print(f"Jakas metoda: {self.file_name=}")
 
 
-pliczek = X("plik_graficzny.jpg") # musi być w xx_obrazy
-pliczek.dowolna_metoda()
