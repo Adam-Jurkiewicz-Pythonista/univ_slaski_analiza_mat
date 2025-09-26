@@ -1,15 +1,9 @@
-from analiza_fn.obrazy import X, CannyEdge
+from analiza_fn.obrazy import CannyEdge, KMeansObraz
 
-pliczek = CannyEdge("test_pliku.abc",edge_directory_last="xx_obrazy") # musi być w edges
-print(pliczek)
-pliczek.show_image()
+pliczek = CannyEdge("plik_graficzny.jpg",edge_directory="xx_obrazy") # musi być w edges
 pliczek.canny_detect()
-pliczek.show_image()
-# pliczek.blur_image()
-# pliczek.show_image()
-# pliczek.show_original_image()
-# #
-# pliczek3 = X("plik_graficzny.jpg")
-# print(pliczek3)
-# pliczek2 = X("test_not.jpg")
-# print(pliczek2)
+
+plik = KMeansObraz("20250829_144656.jpg", kmean_directory= "images_in")
+plik.run_kmeans()
+plik.show_clusters_values()
+plik.save_clusters()

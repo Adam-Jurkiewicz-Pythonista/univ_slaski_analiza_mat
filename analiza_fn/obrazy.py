@@ -13,17 +13,9 @@ from pathlib import Path
 base_dir = Path(__file__).parent.parent
 RUN_DATE = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-# przykład: ścieżka do podfolderu ze zdjęciami - tu zmieniamy ewentualnie!
-IMAGES_DIRECTORY = str(base_dir / "images_in")
-IMAGES_CLUSTER_DIRECTORY = str(base_dir / "images_in/clusters-") + RUN_DATE
+# przykład: ścieżka do podfolderu z logami
 LOGS_DIRECTORY = str(base_dir / "logs")
 #########
-
-
-
-if not os.path.exists(IMAGES_CLUSTER_DIRECTORY):
-    os.makedirs(IMAGES_CLUSTER_DIRECTORY)
-
 if not os.path.exists(LOGS_DIRECTORY):
     os.makedirs(LOGS_DIRECTORY)
 logging.basicConfig(
@@ -34,22 +26,31 @@ logging.basicConfig(
 
 
 # funkcje ogólnego przeznaczenia
-def wczytaj_pliki_z_katalogu(typy_plikow=("jpg", "bmp", "jpeg"), min_wielkosc=1000):
+def wczytaj_pliki_z_katalogu(katalog_zdjec, typy_plikow=("jpg", "bmp", "jpeg"), min_wielkosc=1000):
+    """
+
+    :param katalog:
+    :param typy_plikow:
+    :param min_wielkosc:
+    :return:
+    """
     zwracane_pliki = []
-    # rekurencyjnie sprawdza podkatalogi
-    # https://github.com/abixadamj/helion-python/blob/main/Rozdzial_7/r7_00_walk.py
+    katalog = str(base_dir / katalog_zdjec)
+    if not os.path.exists(katalog):
+        raise NotADirectoryError(f"{katalog} is not a directory or does not exist")
+
     # patrzymy na pliki tylko w 1 katalogu BEZ podkatalogów
     files = [
         f
-        for f in os.listdir(IMAGES_DIRECTORY)
-        if os.path.isfile(os.path.join(IMAGES_DIRECTORY, f))
+        for f in os.listdir(katalog)
+        if os.path.isfile(os.path.join(katalog, f))
     ]
 
     for each_file in files:
         ext = os.path.splitext(each_file)[1].lower()
         for maska in typy_plikow:
             if maska in ext:
-                plik_z_danymi = IMAGES_DIRECTORY + "/" + each_file
+                plik_z_danymi = katalog + "/" + each_file
                 if os.path.getsize(plik_z_danymi) > min_wielkosc:
                     zwracane_pliki.append(each_file)
 
@@ -64,18 +65,20 @@ class Obraz:
         :param additional_images_dir: dodatkowy, jeśli istnieje, to nadpisuje IMAGES_DIRECTORY
         """
 
+        DEFAULT_IMAGES_DIRECTORY = "images"
         self.images_directory = (
-            str(base_dir) + "/" + additional_images_dir if additional_images_dir is not None else IMAGES_DIRECTORY
+            str(base_dir) + "/" + additional_images_dir if additional_images_dir is not None else DEFAULT_IMAGES_DIRECTORY
         )
 
         if not os.path.exists(self.images_directory):
-            raise Exception(f"Directory {self.images_directory} does not exist!!!")
+            raise NotADirectoryError(f"Directory {self.images_directory} error!")
 
         self.file_name = file_name
         self.file_name_only = os.path.splitext(os.path.basename(self.file_name))[0]
         self.file_extension = os.path.splitext(os.path.basename(self.file_name))[1]
         self.file_name_bw = None
         self.image_raw = None
+        self.output_directory = None
         self.image_original = None # tu oryginalny obraz do ewentualnych porównań
         self.file_read_ok = None
         self.md5sum = None
@@ -95,6 +98,20 @@ class Obraz:
     def __str__(self):
         return f"{self.file_name} - {self.image_raw.shape} {self.image_raw.dtype} / md5: {self.md5sum}"
 
+    def create_output_dir(self, directory):
+        directory += f"-{RUN_DATE}"
+        output_directory = str(base_dir / self.images_directory / directory)
+        try:
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+                logging.info(f"{output_directory=} created")
+                self.output_directory = output_directory + "/"
+                return True
+        except Exception as e:
+            etxt = f"Output dir creation: {e=}"
+            logging.error(etxt)
+            raise Exception(etxt)
+
     @staticmethod
     def image_save2file(image_raw, new_file_name, overwrite=False):
         try:
@@ -110,6 +127,32 @@ class Obraz:
                     logging.info(f"File overwritten -- {new_file_name=}")
         except Exception as e:
             logging.error(f"image_save2file {image_raw} - {e=}")
+            return False
+
+
+    def image_save_raw(self, file_name_to_save, which_image="raw", other_image=None, overwrite=False):
+        new_file_name = str(self.output_directory) + file_name_to_save
+        image2save = None
+        if which_image=="raw":
+            image2save = self.image_raw
+        elif which_image=="original":
+            image2save = self.image_original
+        elif which_image=="other":
+            image2save = other_image
+
+        try:
+            if not os.path.isfile(new_file_name):
+                cv2.imwrite(new_file_name, image2save)
+                logging.info(f"File saved -- {new_file_name=}")
+                return True
+            else:
+                logging.info(f"File already exists -- {new_file_name=}")
+                if overwrite:
+                    os.remove(new_file_name)
+                    cv2.imwrite(new_file_name, image2save)
+                    logging.info(f"File overwritten -- {new_file_name=}")
+        except Exception as e:
+            logging.error(f"image_save_raw {image2save.shape} - {e=}")
             return False
 
     def read_file(self):
@@ -139,6 +182,8 @@ class Obraz:
             raise Exception(f"Failed to read {self.file_name} => {e=}")
 
     def change_file_color2bw(self):
+        # chwilowo nie używamy
+        return None
         if self.file_read_ok is None:
             img_tmp = cv2.imread(self.images_directory + "/" + self.file_name)
             self.file_name_bw = self.file_name_only + "_bw" + self.file_extension
@@ -193,6 +238,7 @@ class KMeansObraz(Obraz):
     def __init__(
         self,
         file_name,
+        kmean_directory="clusters",
         n_clusters=5,
         lista_klastrow_do_wydzielenia=None,
         clasters_init="k-means++",
@@ -201,11 +247,13 @@ class KMeansObraz(Obraz):
 
         To jest dokumentacja dla Was
         :param file_name:
+        :param directory: katalog, gdzie są wejściowo pliki - default 'clusters'
         :param n_clusters: liczba klatrów, domyślnie 5
         :param lista_klastrow_do_wydzielenia: np.: (1,3,4) - domyślnie wszystkie
         :param clasters_init: domyślnie 'k-means++', lub 'random'
         """
-        super().__init__(file_name)
+        super().__init__(file_name, additional_images_dir=kmean_directory)
+        #
         self.n_clusters = n_clusters
         self.clusters_init = clasters_init
         self.kmeans = None
@@ -264,13 +312,22 @@ class KMeansObraz(Obraz):
             self.kmeans = True
 
     def save_clusters(self):
+        """
+        Zapisuje obliczone klustry do plików
+        :param dir_clusters: podkatalog do zpisu : default 'out-clusers'
+        :return:
+        """
+        self.create_output_dir(directory="out")
+
         if self.kmeans is None:
             logging.info(f"Run first run_kmeans on {self.file_name} ")
-        for idx, image in enumerate(self.img_clusters):
-            new_file_name = f"{IMAGES_CLUSTER_DIRECTORY}/{self.file_name_only}_{self.centers_names[idx]}_{self.file_extension}"
-            self.image_save2file(image, new_file_name)
 
-    def show_clusters(self):
+        for idx, image in enumerate(self.img_clusters):
+            new_file_name = f"{self.file_name_only}_{self.centers_names[idx]}{self.file_extension}"
+            # self.image_save2file(image, new_file_name)
+            self.image_save_raw(new_file_name, which_image="other", other_image=image, overwrite=True)
+
+    def show_clusters_values(self):
         if self.kmeans is None:
             logging.info(f"Run first run_kmeans on {self.file_name} ")
             return False
@@ -279,7 +336,7 @@ class KMeansObraz(Obraz):
 
 
 class CannyEdge(Obraz):
-    def __init__(self, file_name, edge_directory_last="edges"):
+    def __init__(self, file_name, edge_directory="edges"):
         """
 
         :param file_name:
@@ -287,10 +344,11 @@ class CannyEdge(Obraz):
         """
 
 
-        self.edge_directory = edge_directory_last
+        self.edge_directory = edge_directory
         self.edges_found = None
         logging.info(f"Edge detection for file {file_name=}")
         super().__init__(file_name, additional_images_dir=self.edge_directory)
+        self.create_output_dir(directory="out")
 
     def canny_detect(
         self, search_type="auto", treshold=(127, 127), file_overwrite=False
@@ -305,7 +363,7 @@ class CannyEdge(Obraz):
         logging.info(
             f"Canny Edge detection for file {self.file_name=} / {self.image_raw.shape=}"
         )
-        threshold1, threshold2 = treshold
+        threshold1, threshold2 = treshold  # when 'auto'
         if search_type == "median":
             med_val = np.median(self.image_raw)
             threshold1 = int(max(0, 0.7 * med_val))
@@ -317,24 +375,21 @@ class CannyEdge(Obraz):
             image=self.image_raw, threshold1=threshold1, threshold2=threshold2
         )
         edges_file_name = (
-            self.edge_directory
-            + "/"
-            + self.file_name_only
+            self.file_name_only
             + "_edges_found"
             + self.file_extension
         )
-        self.image_raw = self.edges_found.copy()
-        self.show_image()
-        self.image_save2file(
-            self.edges_found, edges_file_name, overwrite=file_overwrite
-        )
-
-class X(Obraz):
-    def __init__(self, file_name):
-       super().__init__(file_name, additional_images_dir='xx_obrazy')
+        self.image_save_raw(file_name_to_save=edges_file_name,
+                            which_image="other", other_image=self.edges_found,
+                            overwrite=file_overwrite)
 
 
-    def dowolna_metoda(self):
-        print(f"Jakas metoda: {self.file_name=}")
 
 
+# pliczek = CannyEdge("plik_graficzny.jpg",edge_directory="xx_obrazy") # musi być w edges
+# pliczek.canny_detect()
+
+plik = KMeansObraz("20250829_144656.jpg", kmean_directory= "images_in")
+plik.run_kmeans()
+plik.show_clusters_values()
+plik.save_clusters()
