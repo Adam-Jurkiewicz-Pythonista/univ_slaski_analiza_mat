@@ -82,8 +82,8 @@ class Obraz:
             raise Exception(
                 f"__Class__ Obrazy: File {file_name} not found in {self.images_directory}"
             )
-        if not self.read_file():
-            self.change_file_color2bw()
+        # wczytujemy plik
+        self.read_file()
 
         logging.info(
             f"File -- INIT Complete {self.file_name=} in {self.images_directory}"
@@ -119,6 +119,9 @@ class Obraz:
                 self.image_raw = cv2.imread(
                     self.images_directory + "/" + self.file_name, cv2.IMREAD_GRAYSCALE
                 )
+                if self.image_raw is None:
+                    raise Exception(f"File {self.file_name} prawdopodobnie nie jest graficzny")
+
                 self.file_read_ok = True
                 logging.info(
                     f"Read complete {self.file_name} - {self.image_raw.shape} / {self.image_raw.dtype}"
@@ -127,7 +130,7 @@ class Obraz:
             return None
         except Exception as e:
             logging.error(f"Failed to read {self.file_name} => {e=}")
-            return False
+            raise Exception(f"Failed to read {self.file_name} => {e=}")
 
     def change_file_color2bw(self):
         if self.file_read_ok is None:
