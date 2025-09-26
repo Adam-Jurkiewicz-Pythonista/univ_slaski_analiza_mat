@@ -59,12 +59,12 @@ class Obraz:
     def __init__(self, file_name, additional_images_dir=None):
         """
 
-        :param file_name:
+        :param file_name: nazwa pliku, który analizujemy - wymagany
         :param additional_images_dir: dodatkowy, jeśli istnieje, to nadpisuje IMAGES_DIRECTORY
         """
 
         self.images_directory = (
-            additional_images_dir if additional_images_dir is not None else IMAGES_DIRECTORY
+            str(base_dir) + "/" + additional_images_dir if additional_images_dir is not None else IMAGES_DIRECTORY
         )
 
         if not os.path.exists(self.images_directory):
@@ -295,7 +295,7 @@ class CannyEdge(Obraz):
 
 class X(Obraz):
     def __init__(self, file_name):
-        # tu trzeba dać tylko 1 wiersz, by działało
+       super().__init__(file_name, additional_images_dir='xx_obrazy')
 
 
     def dowolna_metoda(self):
